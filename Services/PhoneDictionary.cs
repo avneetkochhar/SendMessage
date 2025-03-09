@@ -2,11 +2,11 @@
 {
     public class PhoneDictionary<Long, Integer>
     {
-        private readonly TimeSpan phoneExpiry = TimeSpan.FromSeconds(2);
+        private readonly TimeSpan phoneExpiry = TimeSpan.FromSeconds(1);
         private Dictionary<Long, (int count, DateTime Expiry)> dictionary = new();
         public void SendMessagedAndSetLimit(Long phone, int count)
         {
-            Console.WriteLine("Message sent...");
+            Console.WriteLine($"Message sent from {phone}...");
             dictionary[phone] = (count + 1, dictionary[phone].Expiry);
         }
 
@@ -16,7 +16,7 @@
             {
                 if (DateTime.Now > dictionary[phone].Expiry)
                 {
-                    Console.WriteLine("Phone session expired: message cannot be sent");
+                    Console.WriteLine($"Phone# {phone} session expired: message cannot be sent");
                     dictionary.Remove(phone);
                     return -1;
                 }

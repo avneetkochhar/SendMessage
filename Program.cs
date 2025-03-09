@@ -1,4 +1,6 @@
 using SendMessage;
+using SendMessage.Models;
+using SendMessage.Services;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -6,17 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddTransient<MessageController>(); // Register controller
 var app = builder.Build();
-
 var scope = app.Services.CreateScope();
 var status =new HttpBody();
 
 app.UseRouting();
-//app.UseAuthorization();
 app.MapControllers();
 app.UseWebSockets();
-
-
-
 
 app.Map("/ws", async context =>
 {
@@ -45,4 +42,25 @@ async Task SendUpdates(WebSocket webSocket)
     }
 }
 
-app.Run();
+//app.Run();
+
+
+
+
+
+const int numberOfMessages = 100;
+
+foreach (Account account in numberOfMessages.generateData()) {
+
+    foreach (HttpBody httpBody in account.httpMessages)
+    {
+        account.accountId.sendMessageWithValidLimit(httpBody);
+    }
+}
+
+
+
+
+
+   
+

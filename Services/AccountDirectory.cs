@@ -2,7 +2,7 @@
 {
     public class AccountDirectory
     {
-        private const int phoneMaxLimit = 3;
+        private const int phoneMaxLimit = 50;
         public PhoneDictionary<long, int> dictionary = new();
 
         public AccountDirectory(string accountID, long businessPhone)
@@ -20,7 +20,7 @@
             }
             else if (limit >= phoneMaxLimit)
             {
-                Console.WriteLine($"Phone max limit {phoneMaxLimit} reached: message cannot be sent");
+                Console.WriteLine($"Phone {businessPhone} max limit {phoneMaxLimit} reached: message cannot be sent");
             }
 
         }
