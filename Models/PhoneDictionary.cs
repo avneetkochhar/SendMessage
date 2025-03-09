@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 using System.Linq;
 using static System.Formats.Asn1.AsnWriter;
@@ -7,35 +8,36 @@ namespace SendMessage.Models
 {
     public class PhoneDictionary<Long, Integer>
     {
-        public readonly TimeSpan TTL = TimeSpan.FromSeconds(4);
-        private const int MaxLimit = 6;
+        private readonly TimeSpan phoneExpiry = TimeSpan.FromSeconds(2);
         private Dictionary<Long, (int count, DateTime Expiry)> dictionary = new();
-
-        public void setCount(Long phone, int count)
+        public void SendMessagedAndSetLimit(Long phone, int count)
         {
-            dictionary[phone] = dictionary.ContainsKey(phone) ? (count, dictionary[phone].Expiry) : (count, DateTime.Now.Add(TTL));
+            Console.WriteLine("Message sent...");
+            dictionary[phone] = (count + 1, dictionary[phone].Expiry);
         }
 
-        public int getLimit(Long phone)
+        public int GetLimit(Long phone)
         {
             if (dictionary.ContainsKey(phone))
             {
-                if (DateTime.Now > dictionary[phone].Expiry || dictionary[phone].count > MaxLimit)
+                if (DateTime.Now > dictionary[phone].Expiry)
                 {
+                    Console.WriteLine("Phone session expired: message cannot be sent");
                     dictionary.Remove(phone);
-                }
-                else
-                {
-                    return dictionary[phone].count;
+                    return -1;
                 }
             }
-            return default;
+            else
+            {
+                dictionary[phone] = (0, DateTime.Now.Add(phoneExpiry));
+            }
+
+            return dictionary[phone].count;
         }
 
         public IEnumerable<KeyValuePair<Long, int>> GetAllValidEntries()
         {
-            return dictionary.Where(kv => DateTime.UtcNow < kv.Value.Expiry )
-                        .Select(kv => new KeyValuePair<Long, int>(kv.Key,kv.Value.count));
+            return dictionary.Select(kv => new KeyValuePair<Long, int>(kv.Key, kv.Value.count));
         }
     }
 }
