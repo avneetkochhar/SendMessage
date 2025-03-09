@@ -1,17 +1,13 @@
-﻿using System.Runtime.InteropServices;
-
-namespace SendMessage.Models
+﻿namespace SendMessage.Services
 {
     public class AccountDirectory
     {
         private const int phoneMaxLimit = 3;
-        private readonly string accountID;
         public PhoneDictionary<long, int> dictionary = new();
 
         public AccountDirectory(string accountID, long businessPhone)
         {
-            this.accountID = accountID;
-            this.SetBusinessPhone(businessPhone);
+            SetBusinessPhone(businessPhone);
         }
 
         public void SetBusinessPhone(long businessPhone)
@@ -20,7 +16,7 @@ namespace SendMessage.Models
 
             if (limit > -1 & limit < phoneMaxLimit)
             {
-                this.dictionary.SendMessagedAndSetLimit(businessPhone, limit);
+                dictionary.SendMessagedAndSetLimit(businessPhone, limit);
             }
             else if (limit >= phoneMaxLimit)
             {
@@ -29,7 +25,7 @@ namespace SendMessage.Models
 
         }
 
-        public int GetLimit(string accountId)
+        public int GetLimit()
         {
             int limit = 0;
 

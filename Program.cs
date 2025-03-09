@@ -38,7 +38,7 @@ async Task SendUpdates(WebSocket webSocket)
     {       
         var controller = scope.ServiceProvider.GetRequiredService<MessageController>(); 
 
-        string jsonMessage = System.Text.Json.JsonSerializer.Serialize(controller.GetBusiness());
+        string jsonMessage = System.Text.Json.JsonSerializer.Serialize(controller.GetDataForWebSocket());
         var buffer = Encoding.UTF8.GetBytes(jsonMessage);
         await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);      
         await Task.Delay(1000); // Send updates every 1 seconds

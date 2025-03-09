@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.Extensions.Caching.Memory;
-using System.Collections.Concurrent;
-using System.Linq;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace SendMessage.Models
+﻿namespace SendMessage.Services
 {
     public class PhoneDictionary<Long, Integer>
     {
