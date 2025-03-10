@@ -2,13 +2,13 @@
 
 namespace SendMessage.Services
 {
-    public class AccountReference
+    public class PhoneDirectoryReference
     {
-        private const int messagesMaxLimit = 50; //maximum limit a phone allow to send messages
+        private const int phoneSmsMaxLimit = 50; //maximum limit a phoneNumber allow sending sms to provider
 
         public PhoneDirectory<long, int> phoneDirectory = new();
 
-        public AccountReference(long businessPhone)
+        public PhoneDirectoryReference(long businessPhone)
         {
             SetBusinessPhone(businessPhone);
         }
@@ -17,18 +17,18 @@ namespace SendMessage.Services
         {
             int limit = phoneDirectory.GetNumberOfMessages(businessPhone);
 
-            if (limit > -1 & limit < messagesMaxLimit)
+            if (limit > -1 & limit < phoneSmsMaxLimit)
             {
                 phoneDirectory.SendMessagedAndSetLimit(businessPhone, limit);
             }
-            else if (limit >= messagesMaxLimit)
+            else if (limit >= phoneSmsMaxLimit)
             {
-                Console.WriteLine($"Phone {businessPhone} max limit {messagesMaxLimit} reached: message cannot be sent");
+                Console.WriteLine($"Phone {businessPhone} max limit {phoneSmsMaxLimit} reached: message cannot be sent");
             }
 
         }
 
-        public int GetAccountLimit()
+        public int GetTotalMessagesLimit()
         {
             int limit = 0;
 

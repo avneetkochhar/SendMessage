@@ -6,20 +6,20 @@ namespace SendMessage.Services
 {
     public static class AccountDirectory
     {
-        private const int accountMaxLimit = 50; //maximum limit a account allow to send messages
+        private const int accountMaxLimit = 50; //maximum limit a account allow sending sms to provider
 
-        private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// // time limit of 1 second for each accountId to live in memoryCache
+        private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// // time limit of 1 second a account sending sms to provider
 
         private static MemoryCache accountDirectory = new(new MemoryCacheOptions());
 
         public static void sendMessageWithValidLimit(this string accountId, HttpBody httpBody)
         {
 
-            if (accountDirectory.TryGetValue(accountId, out AccountReference accounReference))
+            if (accountDirectory.TryGetValue(accountId, out PhoneDirectoryReference phoneNumbersReference))
             {
-                if (accounReference.GetAccountLimit() < accountMaxLimit)
+                if (phoneNumbersReference.GetTotalMessagesLimit() < accountMaxLimit)
                 {
-                    accounReference.SetBusinessPhone(httpBody.BusinessPhone);
+                    phoneNumbersReference.SetBusinessPhone(httpBody.BusinessPhone);
                 }
                 else
                 {
@@ -30,9 +30,9 @@ namespace SendMessage.Services
             {
                 Console.WriteLine($"Starting new accountId {accountId} session");
 
-                AccountReference newAccountReference = new AccountReference( httpBody.BusinessPhone);
+                PhoneDirectoryReference newPhoneNumbersReference = new PhoneDirectoryReference( httpBody.BusinessPhone);
 
-                accountDirectory.Set(accountId, newAccountReference, accountExpiry);
+                accountDirectory.Set(accountId, newPhoneNumbersReference, accountExpiry);
             }
         }
 
@@ -40,13 +40,13 @@ namespace SendMessage.Services
         {  
             Status res = new(accountId);
 
-            if (accountDirectory.TryGetValue(accountId, out AccountReference accountReference)) {
+            if (accountDirectory.TryGetValue(accountId, out PhoneDirectoryReference phoneNumbersRef)) {
 
-                res.accountLimit = accountReference.GetAccountLimit();
+                res.accountLimit = phoneNumbersRef.GetTotalMessagesLimit();
 
-                foreach (KeyValuePair<long,int> kvp in accountReference.phoneDirectory.GetAllValidEntries()) { 
+                foreach (KeyValuePair<long,int> kvp in phoneNumbersRef.phoneDirectory.GetAllValidEntries()) { 
 
-                    res.list.Add(kvp.Key +" : " + accountReference.phoneDirectory.GetNumberOfMessages(kvp.Key));
+                    res.list.Add(kvp.Key +" : " + phoneNumbersRef.phoneDirectory.GetNumberOfMessages(kvp.Key));
                 }
             }
             return new

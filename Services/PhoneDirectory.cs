@@ -2,7 +2,7 @@
 {
     public class PhoneDirectory<Long, Integer>
     {
-        private readonly TimeSpan phoneExpiry = TimeSpan.FromSeconds(1);// time limit of 1 second for each phoneNumber to send sms
+        private readonly TimeSpan phoneNumberExpiry = TimeSpan.FromSeconds(1);// time limit of 1 second for a phoneNumber sending sms to provider
 
         private Dictionary<Long, (int numberOfMessages, DateTime Expiry)> phoneDirectory = new();
         public void SendMessagedAndSetLimit(Long phone, int count)
@@ -27,7 +27,7 @@
             }
             else
             {
-                phoneDirectory[phone] = (0, DateTime.Now.Add(phoneExpiry));
+                phoneDirectory[phone] = (0, DateTime.Now.Add(phoneNumberExpiry));
             }
 
             return phoneDirectory[phone].numberOfMessages;
