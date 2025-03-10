@@ -1,14 +1,14 @@
 ﻿using SendMessage.Models;
-using System.Collections;
 using System.Net.WebSockets;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace SendMessage.Services
 {
     public static class Generator
     {
         private static string[] accounts = { "acc1" , "acc2", "acc3", "acc4" };
+
         private static HttpBody[] GenerateMessages(int n)
         {
 
@@ -27,6 +27,7 @@ namespace SendMessage.Services
             }
             return data;
         }
+
         private static Account[] CreateMessagesForAllAccount(this int numberOfMessages)
         {           
             int n = accounts.Length;
@@ -36,18 +37,20 @@ namespace SendMessage.Services
             {
                 accountArray[n] = new Account
                 {
-                    accountId = accounts[random.Next(0, n)],
+                    accountId = accounts[random.Next(0, accounts.Length)],
                     httpMessages = GenerateMessages(numberOfMessages)
                 };
             }
             return accountArray;
         }
+
         public static async Task GenerateTestDataAndSendSMS(int messagesPerAccount)
         {
             WebSocket webSocket = null;
 
             await CreateAndSendMessages(messagesPerAccount, webSocket);
         }       
+
         public static async Task GenerateTestDataToSendSMSAndGetUpdatesWithWebSocket(this HttpContext context, int messagesPerAccount)
         {
             using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
@@ -55,7 +58,7 @@ namespace SendMessage.Services
             await CreateAndSendMessages(messagesPerAccount, webSocket);
 
         }
-
+        
         private static async Task CreateAndSendMessages(int messagesPerAccount, WebSocket webSocket)
         {
             Account[] accountArray = messagesPerAccount.CreateMessagesForAllAccount();
@@ -81,7 +84,7 @@ namespace SendMessage.Services
 
             Console.WriteLine($"Time taken {(int)difference.TotalMinutes} minute {(int)difference.TotalSeconds} seconds ");
         }
-
+        
         private static async Task SendUpdatesToWebSocket(WebSocket? webSocket, object status)
         {
             if ( !( webSocket==null))

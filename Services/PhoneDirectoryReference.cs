@@ -10,10 +10,10 @@ namespace SendMessage.Services
 
         public PhoneDirectoryReference(long businessPhone)
         {
-            SetBusinessPhone(businessPhone);
+            UpdatePhoneNumberAndSendMessage(businessPhone);
         }
 
-        public void SetBusinessPhone(long businessPhone)
+        public void UpdatePhoneNumberAndSendMessage(long businessPhone)
         {
             int limit = phoneDirectory.GetNumberOfMessages(businessPhone);
 
@@ -28,7 +28,7 @@ namespace SendMessage.Services
 
         }
 
-        public int GetTotalMessagesLimit()
+        public int GetTotalMessagesSent()
         {
             int limit = 0;
 
