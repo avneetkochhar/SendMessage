@@ -1,5 +1,8 @@
 ﻿using SendMessage.Models;
 using System.Collections;
+using System.Net.WebSockets;
+using System.Text.Json;
+using System.Text;
 
 namespace SendMessage.Services
 {
@@ -25,7 +28,7 @@ namespace SendMessage.Services
             return data;
         }
 
-        public static Account[] GenerateData(this int numberOfMessages)
+        private static Account[] GenerateData(this int numberOfMessages)
         {           
             int n = accounts.Length;
             Account[] accountArray = new Account[n];
@@ -41,5 +44,49 @@ namespace SendMessage.Services
             return accountArray;
         }
 
+        public static async Task GenerateTestDataAndGetUpdatesAsync(int numberOfMessages)
+        {
+            Account[] accountArray = numberOfMessages.GenerateData();
+
+            foreach (Account account in accountArray)
+            {
+
+                foreach (HttpBody httpBody in account.httpMessages)
+                {
+                    account.accountId.sendMessageWithValidLimit(httpBody);
+                }
+
+                Object status = account.accountId.GetDetails();
+
+                Console.WriteLine(status);
+
+            }
+        }
+        public static async Task GenerateTestDataAndGetUpdatesAsync(this HttpContext context, int numberOfMessages)
+        {
+            using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+
+            Account[] accountArray = numberOfMessages.GenerateData();
+
+            foreach (Account account in accountArray)
+            {
+
+                foreach (HttpBody httpBody in account.httpMessages)
+                {
+                    account.accountId.sendMessageWithValidLimit(httpBody);
+                }
+
+                Object status = account.accountId.GetDetails();
+
+                Console.WriteLine(status);
+
+                string jsonMessage = JsonSerializer.Serialize(status);
+
+                var buffer = Encoding.UTF8.GetBytes(jsonMessage);
+
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+
+            }
+        }
     }
 }
