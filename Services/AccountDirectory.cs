@@ -6,7 +6,7 @@ namespace SendMessage.Services
 {
     public static class AccountDirectory
     {
-        private const int accountMaxLimit = 50; //maximum limit a account allow sending sms to provider
+        private const int accountSmsMaxLimit = 50; //maximum limit a account allow sending sms to provider
 
         private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// // time limit of 1 second a account sending sms to provider
 
@@ -15,15 +15,15 @@ namespace SendMessage.Services
         public static void sendMessageWithValidLimit(this string accountId, HttpBody httpBody)
         {
 
-            if (accountDirectory.TryGetValue(accountId, out PhoneDirectoryReference phoneNumbersReference))
+            if (accountDirectory.TryGetValue(accountId, out PhoneDirectoryReference phoneNumbersList))
             {
-                if (phoneNumbersReference.GetTotalMessagesLimit() < accountMaxLimit)
+                if (phoneNumbersList.GetTotalMessagesSent() < accountSmsMaxLimit)
                 {
-                    phoneNumbersReference.SetBusinessPhone(httpBody.BusinessPhone);
+                    phoneNumbersList.UpdatePhoneNumberAndSendMessage(httpBody.BusinessPhone);
                 }
                 else
                 {
-                    Console.WriteLine($"Account {accountId} max limit {accountMaxLimit} reached: message cannot be sent");
+                    Console.WriteLine($"Account {accountId} max limit {accountSmsMaxLimit} reached: message cannot be sent");
                 }
             }
             else
@@ -42,7 +42,7 @@ namespace SendMessage.Services
 
             if (accountDirectory.TryGetValue(accountId, out PhoneDirectoryReference phoneNumbersRef)) {
 
-                res.accountLimit = phoneNumbersRef.GetTotalMessagesLimit();
+                res.accountLimit = phoneNumbersRef.GetTotalMessagesSent();
 
                 foreach (KeyValuePair<long,int> kvp in phoneNumbersRef.phoneDirectory.GetAllValidEntries()) { 
 
