@@ -1,46 +1,60 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Extensions.Caching.Memory;
+using SendMessage.Models;
+using System.Text.Json;
 
 namespace SendMessage.Services
 {
-    public class AccountDirectory
+    public static class AccountDirectory
     {
-        private const int phoneMaxLimit = 50;
-        public PhoneDictionary<long, int> dictionary = new();
+        private const int accountMaxLimit = 50;
 
-        public AccountDirectory(string accountID, long businessPhone)
+        private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// 
+
+        private static MemoryCache accoutDirectory = new(new MemoryCacheOptions());
+
+        public static void sendMessageWithValidLimit(this string accountId, HttpBody httpBody)
         {
-            SetBusinessPhone(businessPhone);
+
+            if (accoutDirectory.TryGetValue(accountId, out AccountReference accounReference))
+            {
+                if (accounReference.GetAccountLimit() < accountMaxLimit)
+                {
+                    accounReference.SetBusinessPhone(httpBody.BusinessPhone);
+                }
+                else
+                {
+                    Console.WriteLine($"Account {accountId} max limit {accountMaxLimit} reached: message cannot be sent");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Starting new accountId {accountId} session");
+
+                AccountReference newAccountReference = new AccountReference( httpBody.BusinessPhone);
+
+                accoutDirectory.Set(accountId, newAccountReference, accountExpiry);
+            }
         }
 
-        public void SetBusinessPhone(long businessPhone)
-        {
-            int limit = dictionary.GetPhoneLimit(businessPhone);
+        public static Object GetDetails(this string accountId)
+        {  
+            Status res = new(accountId);
 
-            if (limit > -1 & limit < phoneMaxLimit)
-            {
-                dictionary.SendMessagedAndSetLimit(businessPhone, limit);
-            }
-            else if (limit >= phoneMaxLimit)
-            {
-                Console.WriteLine($"Phone {businessPhone} max limit {phoneMaxLimit} reached: message cannot be sent");
-            }
+            if (accoutDirectory.TryGetValue(accountId, out AccountReference accountDirectory)) {
 
+                res.accountLimit = accountDirectory.GetAccountLimit();
+
+                foreach (KeyValuePair<long,int> kvp in accountDirectory.phoneDirectory.GetAllValidEntries()) { 
+
+                    res.list.Add(kvp.Key +" : " + accountDirectory.phoneDirectory.GetNumberOfMessages(kvp.Key));
+                }
+            }
+            return new
+            {
+                accountId = res.accountId,
+                accountLimit = res.accountLimit,
+                list = JsonSerializer.Serialize( res.list)
+            };
         }
-
-        public int GetAccountLimit()
-        {
-            int limit = 0;
-
-            foreach (var kvp in dictionary.GetAllValidEntries())
-            {
-                limit += kvp.Value;
-            }
-            return limit;
-        }
-
-        //public Dictionary<Long, (int count, DateTime Expiry)> getPhoneDictionary()
-        //{
-        //    return dictionary;
-        //}
     }
 }

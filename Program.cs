@@ -10,15 +10,15 @@ app.UseRouting();
 app.MapControllers();
 app.UseWebSockets();
 
-//await Generator.GenerateTestDataAndGetUpdatesAsync(100);
+await Generator.GenerateTestDataAndGetUpdatesAsync(250);
 
 app.Map("/frontEnd-webSocket", async context =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
         DateTime startTime = DateTime.Now;
-
-        await context.GenerateTestDataAndGetUpdatesAsync(5000);
+        
+        await context.GenerateTestDataAndGetUpdatesAsync(200);
 
         DateTime endTime = DateTime.Now;
 

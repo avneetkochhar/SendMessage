@@ -8,7 +8,7 @@ namespace SendMessage.Services
 {
     public static class Generator
     {
-        private static string[] accounts = { "acc1", "acc2", "acc3", "acc4" };
+        private static string[] accounts = { "acc1" , "acc2", "acc3", "acc4" };
         private static HttpBody[] GenerateMessages(int n)
         {
 
@@ -27,8 +27,7 @@ namespace SendMessage.Services
             }
             return data;
         }
-
-        private static Account[] GenerateData(this int numberOfMessages)
+        private static Account[] CreateMessagesForEachAccount(this int numberOfMessages)
         {           
             int n = accounts.Length;
             Account[] accountArray = new Account[n];
@@ -44,9 +43,9 @@ namespace SendMessage.Services
             return accountArray;
         }
 
-        public static async Task GenerateTestDataAndGetUpdatesAsync(int numberOfMessages)
+        public static async Task GenerateTestDataAndGetUpdatesAsync(int messagesPerAccount)
         {
-            Account[] accountArray = numberOfMessages.GenerateData();
+            Account[] accountArray = messagesPerAccount.CreateMessagesForEachAccount();
 
             foreach (Account account in accountArray)
             {
@@ -62,11 +61,11 @@ namespace SendMessage.Services
 
             }
         }
-        public static async Task GenerateTestDataAndGetUpdatesAsync(this HttpContext context, int numberOfMessages)
+        public static async Task GenerateTestDataAndGetUpdatesAsync(this HttpContext context, int messagesPerAccount)
         {
             using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-            Account[] accountArray = numberOfMessages.GenerateData();
+            Account[] accountArray = messagesPerAccount.CreateMessagesForEachAccount();
 
             foreach (Account account in accountArray)
             {
