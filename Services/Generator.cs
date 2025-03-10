@@ -27,7 +27,7 @@ namespace SendMessage.Services
             }
             return data;
         }
-        private static Account[] CreateMessagesForEachAccount(this int numberOfMessages)
+        private static Account[] CreateMessagesForAllAccount(this int numberOfMessages)
         {           
             int n = accounts.Length;
             Account[] accountArray = new Account[n];
@@ -42,30 +42,25 @@ namespace SendMessage.Services
             }
             return accountArray;
         }
-
-        public static async Task GenerateTestDataAndGetUpdatesAsync(int messagesPerAccount)
+        public static async Task GenerateTestDataAndSendSMS(int messagesPerAccount)
         {
-            Account[] accountArray = messagesPerAccount.CreateMessagesForEachAccount();
+            WebSocket webSocket = null;
 
-            foreach (Account account in accountArray)
-            {
-
-                foreach (HttpBody httpBody in account.httpMessages)
-                {
-                    account.accountId.sendMessageWithValidLimit(httpBody);
-                }
-
-                Object status = account.accountId.GetDetails();
-
-                Console.WriteLine(status);
-
-            }
-        }
-        public static async Task GenerateTestDataAndGetUpdatesAsync(this HttpContext context, int messagesPerAccount)
+            await CreateAndSendMessages(messagesPerAccount, webSocket);
+        }       
+        public static async Task GenerateTestDataToSendSMSAndGetUpdatesWithWebSocket(this HttpContext context, int messagesPerAccount)
         {
             using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-            Account[] accountArray = messagesPerAccount.CreateMessagesForEachAccount();
+            await CreateAndSendMessages(messagesPerAccount, webSocket);
+
+        }
+
+        private static async Task CreateAndSendMessages(int messagesPerAccount, WebSocket webSocket)
+        {
+            Account[] accountArray = messagesPerAccount.CreateMessagesForAllAccount();
+
+            DateTime startTime = DateTime.Now;
 
             foreach (Account account in accountArray)
             {
@@ -79,12 +74,23 @@ namespace SendMessage.Services
 
                 Console.WriteLine(status);
 
+                await SendUpdatesToWebSocket(webSocket, status);
+            }
+
+            TimeSpan difference = DateTime.Now - startTime;
+
+            Console.WriteLine($"Time taken {(int)difference.TotalMinutes} minute {(int)difference.TotalSeconds} seconds ");
+        }
+
+        private static async Task SendUpdatesToWebSocket(WebSocket? webSocket, object status)
+        {
+            if ( !( webSocket==null))
+            {
                 string jsonMessage = JsonSerializer.Serialize(status);
 
                 var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-
             }
         }
     }

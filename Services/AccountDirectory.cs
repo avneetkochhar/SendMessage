@@ -6,16 +6,16 @@ namespace SendMessage.Services
 {
     public static class AccountDirectory
     {
-        private const int accountMaxLimit = 50;
+        private const int accountMaxLimit = 50; //maximum limit a account allow to send messages
 
-        private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// 
+        private static readonly TimeSpan accountExpiry = TimeSpan.FromSeconds(1);// // time limit of 1 second for each accountId to live in memoryCache
 
-        private static MemoryCache accoutDirectory = new(new MemoryCacheOptions());
+        private static MemoryCache accountDirectory = new(new MemoryCacheOptions());
 
         public static void sendMessageWithValidLimit(this string accountId, HttpBody httpBody)
         {
 
-            if (accoutDirectory.TryGetValue(accountId, out AccountReference accounReference))
+            if (accountDirectory.TryGetValue(accountId, out AccountReference accounReference))
             {
                 if (accounReference.GetAccountLimit() < accountMaxLimit)
                 {
@@ -32,7 +32,7 @@ namespace SendMessage.Services
 
                 AccountReference newAccountReference = new AccountReference( httpBody.BusinessPhone);
 
-                accoutDirectory.Set(accountId, newAccountReference, accountExpiry);
+                accountDirectory.Set(accountId, newAccountReference, accountExpiry);
             }
         }
 
@@ -40,13 +40,13 @@ namespace SendMessage.Services
         {  
             Status res = new(accountId);
 
-            if (accoutDirectory.TryGetValue(accountId, out AccountReference accountDirectory)) {
+            if (accountDirectory.TryGetValue(accountId, out AccountReference accountReference)) {
 
-                res.accountLimit = accountDirectory.GetAccountLimit();
+                res.accountLimit = accountReference.GetAccountLimit();
 
-                foreach (KeyValuePair<long,int> kvp in accountDirectory.phoneDirectory.GetAllValidEntries()) { 
+                foreach (KeyValuePair<long,int> kvp in accountReference.phoneDirectory.GetAllValidEntries()) { 
 
-                    res.list.Add(kvp.Key +" : " + accountDirectory.phoneDirectory.GetNumberOfMessages(kvp.Key));
+                    res.list.Add(kvp.Key +" : " + accountReference.phoneDirectory.GetNumberOfMessages(kvp.Key));
                 }
             }
             return new

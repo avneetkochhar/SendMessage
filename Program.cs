@@ -10,21 +10,13 @@ app.UseRouting();
 app.MapControllers();
 app.UseWebSockets();
 
-await Generator.GenerateTestDataAndGetUpdatesAsync(250);
+await Generator.GenerateTestDataAndSendSMS(250);
 
 app.Map("/frontEnd-webSocket", async context =>
 {
     if (context.WebSockets.IsWebSocketRequest)
-    {
-        DateTime startTime = DateTime.Now;
-        
-        await context.GenerateTestDataAndGetUpdatesAsync(200);
-
-        DateTime endTime = DateTime.Now;
-
-        TimeSpan difference = endTime - startTime;
-
-        Console.WriteLine($"Time taken {(int)difference.TotalMinutes} minute {(int)difference.TotalSeconds} seconds ");
+    {        
+        await context.GenerateTestDataToSendSMSAndGetUpdatesWithWebSocket(20000);// maximum limit a phone allow to send messages
     }
     else
     {

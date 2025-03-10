@@ -4,7 +4,7 @@ namespace SendMessage.Services
 {
     public class AccountReference
     {
-        private const int messagesMaxLimit = 50;
+        private const int messagesMaxLimit = 50; //maximum limit a phone allow to send messages
 
         public PhoneDirectory<long, int> phoneDirectory = new();
 
