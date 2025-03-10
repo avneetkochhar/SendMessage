@@ -1,4 +1,6 @@
-﻿namespace SendMessage.Services
+﻿using System.Runtime.InteropServices;
+
+namespace SendMessage.Services
 {
     public class AccountDirectory
     {
@@ -12,7 +14,7 @@
 
         public void SetBusinessPhone(long businessPhone)
         {
-            int limit = dictionary.GetLimit(businessPhone);
+            int limit = dictionary.GetPhoneLimit(businessPhone);
 
             if (limit > -1 & limit < phoneMaxLimit)
             {
@@ -25,7 +27,7 @@
 
         }
 
-        public int GetLimit()
+        public int GetAccountLimit()
         {
             int limit = 0;
 
@@ -33,8 +35,12 @@
             {
                 limit += kvp.Value;
             }
-
             return limit;
         }
+
+        //public Dictionary<Long, (int count, DateTime Expiry)> getPhoneDictionary()
+        //{
+        //    return dictionary;
+        //}
     }
 }

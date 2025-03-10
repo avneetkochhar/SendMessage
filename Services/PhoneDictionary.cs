@@ -10,7 +10,7 @@
             dictionary[phone] = (count + 1, dictionary[phone].Expiry);
         }
 
-        public int GetLimit(Long phone)
+        public int GetPhoneLimit(Long phone)
         {
             if (dictionary.ContainsKey(phone))
             {
@@ -33,5 +33,7 @@
         {
             return dictionary.Select(kv => new KeyValuePair<Long, int>(kv.Key, kv.Value.count));
         }
+
+       
     }
 }
