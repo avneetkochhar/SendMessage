@@ -67,10 +67,16 @@ namespace SendMessage.Services
 
             foreach (Account account in accountArray)
             {
-
-                foreach (HttpBody httpBody in account.httpMessages)
+                for (int i = 0, batchSize = 100; i < account.httpMessages.Count(); i += batchSize)
                 {
-                    account.accountId.sendMessageWithValidLimit(httpBody);
+                  var batchParameters = account.httpMessages.Skip(i).Take(batchSize).ToList();
+
+                    var tasks = batchParameters.Select(async httpBody =>
+                    {                       
+                            account.accountId.sendMessageWithValidLimit(httpBody);                        
+                    });
+
+                     await Task.WhenAll(tasks);
                 }
 
                 Object status = account.accountId.GetDetails();

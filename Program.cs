@@ -10,13 +10,13 @@ app.UseRouting();
 app.MapControllers();
 app.UseWebSockets();
 
-await Generator.GenerateTestDataAndSendSMS(250);// pass a number to generate test messages in each account
+await Generator.GenerateTestDataAndSendSMS(25000);// pass a number to generate test messages in each account
 
 app.Map("/frontEnd-webSocket", async context =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {  
-        await context.GenerateTestDataToSendSMSAndGetUpdatesWithWebSocket(2000);// pass a number to generate test messages in each account
+        await context.GenerateTestDataToSendSMSAndGetUpdatesWithWebSocket(25000);// pass a number to generate test messages in each account
     }
     else
     {
